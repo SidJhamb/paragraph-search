@@ -46,3 +46,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Paragraph(models.Model):
+    """Paragraphs."""
+    text = models.TextField()
