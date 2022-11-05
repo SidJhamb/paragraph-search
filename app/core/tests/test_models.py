@@ -7,9 +7,11 @@ from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
+
 def create_user(email='user@example.com', password='testpass123'):
     """Create a return a new user."""
     return get_user_model().objects.create_user(email, password)
+
 
 class ModelTests(TestCase):
     """Test models."""
@@ -38,12 +40,10 @@ class ModelTests(TestCase):
             user = get_user_model().objects.create_user(email, 'sample123')
             self.assertEqual(user.email, expected)
 
-
     def test_new_user_without_email_raises_error(self):
         """Test that creating a user without an email raises a ValueError."""
         with self.assertRaises(ValueError):
             get_user_model().objects.create_user('', 'test123')
-
 
     def test_create_superuser(self):
         """Test creating a superuser."""

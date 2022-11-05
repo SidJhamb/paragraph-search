@@ -18,6 +18,4 @@ router.register('search', views.ParagraphListViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('get', views.ParagraphCreateView.as_view(), name='create'),
-    #path('get/<int:pk>/', views.ParagraphRetrieveView.as_view()),
-    #path('get/(?P<id>.+)/$', views.ParagraphListView.as_view()),
 ]

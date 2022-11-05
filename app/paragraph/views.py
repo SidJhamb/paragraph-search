@@ -47,16 +47,28 @@ class ParagraphRetrieveView(RetrieveAPIView):
     serializer_class = serializers.ParagraphSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'words',
+                OpenApiTypes.STR,
+                description='Comma separated list of words to filter.',
+            ),
+            OpenApiParameter(
+                'operator',
+                OpenApiTypes.STR,
+                description='Operator to use for filtering.',
+            ),
+        ]
+    )
+)
 class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """Manage tags in the database."""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     serializer_class = serializers.ParagraphSerializer
     queryset = Paragraph.objects.all()
-    # filter_backends = [filters.SearchFilter]
-    # filter_backends = (FullWordSearchFilter, )
-    # search_fields = ['id']
-    # word_fields = ('text',)
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
@@ -73,12 +85,5 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
                 query += word + " & "
             query = query.removesuffix(" & ")
 
-        print("query")
-        print(query)
-
         search_query = SearchQuery(query, search_type="raw")
-        # return Paragraph.objects.filter(text__contains=word)
-        # return Paragraph.objects.filter(id__in=ids)
         return Paragraph.objects.annotate(search=SearchVector('text')).filter(search=search_query)
-        # return Paragraph.objects.all()
-        # return Paragraph.objects.filter(text__search=word)
