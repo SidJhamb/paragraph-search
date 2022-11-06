@@ -45,7 +45,7 @@ class ParagraphCreateView(CreateAPIView):
     serializer_class = serializers.ParagraphSerializer
 
     def create(self, request, *args, **kwargs):
-        """Create new record for the authenticated user."""
+        """Create new paragraph record for the authenticated user."""
         text = api_client.get_paragraph()
         if text is None:
             return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
