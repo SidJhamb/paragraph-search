@@ -1,8 +1,7 @@
 """
-Views for the paragraph APIs
+Views for the paragraph APIs.
 """
 import re
-import logging
 from collections import Counter
 
 from drf_spectacular.utils import (
@@ -32,8 +31,6 @@ from paragraph import (
     api_client
 )
 
-logger = logging.getLogger(__name__)
-
 
 class ParagraphCreateView(RetrieveAPIView):
     """View for fetching paragraphs from an external API and storing in the database."""
@@ -41,9 +38,9 @@ class ParagraphCreateView(RetrieveAPIView):
     serializer_class = serializers.ParagraphSerializer
 
     def get(self, request, *args, **kwargs):
-        """Create new paragraph record."""
+        """Fetch and create a new paragraph record."""
         try:
-            logger.info('This is a debug message')
+            # Get a new paragraph from the external API.
             response_text = api_client.get_paragraph()
         except Exception as err:
             return Response(data={"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -64,6 +61,7 @@ class DictionaryRetrieveView(RetrieveAPIView):
         counter = Counter()
 
         for paragraph_text in Paragraph.objects.all():
+            # Remove leading and trailing special characters from each word in the paragraph like , ! & $ etc.
             words = re.findall(r'\w+', paragraph_text.text)
             counter += Counter(dict(Counter(words).most_common(max_count)))
 
@@ -77,9 +75,10 @@ class DictionaryRetrieveView(RetrieveAPIView):
         return response
 
     def get(self, request, *args, **kwargs):
-        """Get response."""
+        # Get the 10 most common words in all paragraphs.
         common_words = self._get_common_words(max_count=10)
         try:
+            # Get the word definition from external API for each common word and populate the response object.
             response = self._populate_response(common_words)
         except Exception as err:
             return Response(data={"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -124,7 +123,7 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         return SearchQuery(query, search_type="raw")
 
     def get_queryset(self):
-        """Filter queryset for the authenticated user."""
+        """Filter queryset."""
         word_filter_present = False
         operator_filter_present = False
 
@@ -136,10 +135,12 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             operator_filter_present = True
             operator = self.request.query_params.get('operator')
 
+        # Filter paragraphs
         if word_filter_present and operator_filter_present:
             search_query = self._populate_search_query(words, operator)
             return Paragraph.objects.annotate(search=SearchVector('text')).filter(search=search_query)
 
+        # Return all paragraphs
         if not word_filter_present and not operator_filter_present:
             return Paragraph.objects.all()
 

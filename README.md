@@ -19,10 +19,24 @@ This starts a server on `localhost 127.0.0.1` listening to port `8000`.
 ## Unit Tests
 Execute the following command from the root directory of the project to run unit tests.
 ```
+cd paragraph-search
 docker-compose run --rm app sh -c "python manage.py test"
 ```
 
-## Structure
+## Technology Stack
+* Web framework : Django, Django REST framework
+* Database : PostgreSQL
+* Programming Language : Python
+* Containerization : Docker, docker-compose
+* CI/CD platform : Github Actions
+
+## GitHub Actions
+GitHub actions are enabled for merges to the source code repository, and they automate the execution of following
+tasks.
+* Running Unit Tests.
+* Running Linting checks by leveraging the `flake8` module.
+
+## Source Code Structure
 ```
 app                       
   ├── app                  // Root Django project
@@ -43,13 +57,17 @@ app
   └── manage.py
   └── .flake8
 .gitignore
-.dockerignore
-docker-compose.yml
-Dockerfile
-requirements.dev.txt
-requirements.txt
+.dockerignore              
+docker-compose.yml         // Docker compose configuration file.
+Dockerfile                 // The Dockerfile
+requirements.dev.txt       // The file enlisting python module requirements for DEV environment.
+requirements.txt           // The file enlisting python module requirements.
 
 ```
+
+## Swagger Documentation
+The Swagger documentation, as per the OpenAPI Specification, can be accessed at `http://127.0.0.1:8000/docs/`, after
+`docker-compose up` has run successfully.
 
 ## REST API
 
@@ -60,7 +78,7 @@ successfully and started serving the paragraph search service.
 This fetches 1 paragraph from [http://metaphorpsum.com/](http://metaphorpsum.com/) with 50 sentences and stores it 
 as an instance of `Paragraph` model defined in [models.py](/app/core/models.py)
 
-#### Sample Request
+##### Sample Request
 ```
 curl --location --request GET 'http://127.0.0.1:8000/paragraph/get'
 ```
@@ -75,13 +93,17 @@ GET /paragraph/get HTTP/1.1" 201 3245
 } 
 ```
 
-##### **/paragraph/search/**
-* Search through stored paragraphs 
-* Allow providing multiple words (`?words=`) and one of the two operators: **or** or **and** (`&operator=`). For example,
+### **/paragraph/search/**
+* This searches through the stored paragraphs, and allows filtering based the query parameters.
+* For query parameters, we can provide multiple comma separated words (`?words=word1,word2..`) and one of the 
+  two operators: **or** or **and** (`&operator=`). For example,
   * Words `one`, `two`, `three`, with the `or` operator should return any paragraphs that
   have at least one of the three words.
   * Words `one`, `two`, `three`, with the `and` operator should return paragraphs that have
   all the three words.
+* If no query parameters are provided, then the API returns all the paragraphs stored in the database.
+* If query parameters are present, then providing both in the URL, `words` and `operator`, is mandatory. If just either 
+  one is provided, it is considered as a Bad Request.
 
 ##### Sample Request
 ```
@@ -106,8 +128,9 @@ GET /paragraph/search/?words=assumed&operator=and HTTP/1.1" 200 74999
 ```
 
 ### **/paragraph/dictionary/**
-* Returns the definition of the top 10 words (frequency) found in the all the paragraphs currently store in the system.
-* Word definition should retrieved from [https://dictionaryapi.dev/](https://dictionaryapi.dev/).
+* This returns the definition of the top 10 words (frequency wise) found in the all the paragraphs currently stored in 
+  the database.
+* Word definition is retrieved from [https://dictionaryapi.dev/](https://dictionaryapi.dev/).
 
 ##### Sample Request
 ```
