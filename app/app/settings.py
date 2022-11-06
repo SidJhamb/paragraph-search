@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'paragraph',
     'django.contrib.postgres',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
