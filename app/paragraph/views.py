@@ -17,7 +17,6 @@ from rest_framework import (
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
-    ListAPIView
 )
 from rest_framework import status
 from rest_framework.exceptions import ValidationError

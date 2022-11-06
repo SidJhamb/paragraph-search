@@ -133,7 +133,7 @@ class ParagraphSearchApiTests(TestCase):
     def test_retrieve_paragraphs_and_operator(self):
         """Test retrieving a list of paragraphs."""
         p1_id = create_paragraph("This is a test paragraph")
-        p2_id = create_paragraph("This is another sample paragraph")
+        create_paragraph("This is another sample paragraph")
 
         params = {'words': f'{"test"},{"paragraph"}', 'operator': f'{"and"}'}
         res = self.client.get(PARAGRAPHS_LIST_URL, params)
