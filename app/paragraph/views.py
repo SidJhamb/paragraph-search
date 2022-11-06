@@ -14,14 +14,13 @@ from rest_framework import (
     viewsets,
     mixins,
 )
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
     ListAPIView
 )
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from django.contrib.postgres.search import (
     SearchQuery,
@@ -39,8 +38,6 @@ from paragraph import (
 
 class ParagraphCreateView(CreateAPIView):
     """View for creating paragraphs."""
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
     queryset = Paragraph.objects.all()
     serializer_class = serializers.ParagraphSerializer
 
@@ -60,8 +57,6 @@ class ParagraphCreateView(CreateAPIView):
 
 class DictionaryRetrieveView(RetrieveAPIView):
     """View for retrieving definition of the most common words present in the database."""
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
     queryset = Paragraph.objects.all()
     serializer_class = serializers.ParagraphSerializer
 
@@ -78,12 +73,8 @@ class DictionaryRetrieveView(RetrieveAPIView):
     @staticmethod
     def _populate_response(common_words):
         response = {}
-        try:
-            for word, count in common_words:
-                response[word] = api_client.get_word_definition(word)
-        except Exception:
-            raise
-
+        for word, count in common_words:
+            response[word] = api_client.get_word_definition(word)
         return response
 
     def get(self, request, *args, **kwargs):
@@ -115,8 +106,6 @@ class DictionaryRetrieveView(RetrieveAPIView):
 )
 class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """Retrieve paragraphs from the database based on the search query."""
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
     serializer_class = serializers.ParagraphSerializer
     queryset = Paragraph.objects.all()
 
@@ -137,7 +126,22 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         """Filter queryset for the authenticated user."""
-        words = self.request.query_params.get('words').split(',')
-        operator = self.request.query_params.get('operator')
-        search_query = self._populate_search_query(words, operator)
-        return Paragraph.objects.annotate(search=SearchVector('text')).filter(search=search_query)
+        word_filter_present = False
+        operator_filter_present = False
+
+        if 'words' in self.request.query_params:
+            word_filter_present = True
+            words = self.request.query_params.get('words').split(',')
+
+        if 'operator' in self.request.query_params:
+            operator_filter_present = True
+            operator = self.request.query_params.get('operator')
+
+        if word_filter_present and operator_filter_present:
+            search_query = self._populate_search_query(words, operator)
+            return Paragraph.objects.annotate(search=SearchVector('text')).filter(search=search_query)
+
+        if not word_filter_present and not operator_filter_present:
+            return Paragraph.objects.all()
+
+        raise ValidationError(detail='Invalid search query parameters.')

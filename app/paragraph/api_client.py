@@ -7,7 +7,6 @@ DEFINITION_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 def get_paragraph():
     try:
         response = requests.get(PARAGRAPH_URL)
-        # If the response was successful, no Exception will be raised
         response.raise_for_status()
         return response.text
     except Exception:
@@ -15,10 +14,9 @@ def get_paragraph():
 
 
 def get_word_definition(word):
-    try:
-        response = requests.get(DEFINITION_URL + word)
-        # If the response was successful, no Exception will be raised
-        response.raise_for_status()
-        return response.json()
-    except Exception:
-        raise
+    response = requests.get(DEFINITION_URL + word)
+
+    if response.status_code != 200 and response.status_code != 404:
+        raise Exception("Error while processing the API request to https://dictionaryapi.dev/.")
+
+    return response.json()
