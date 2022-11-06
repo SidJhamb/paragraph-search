@@ -1,9 +1,9 @@
 # Paragraph Search Service
 
-This is the source code of a Paragraph Search Service serving a REST API.
+This is the source code of Paragraph Search Service.
 
 ## Prerequisites
-Following are the **prerequisites** that need to be installed beforehand.
+Following are the **prerequisites** that need to be installed beforehand, before being able to run the service.
 * Docker
 
 ## Setup
