@@ -5,13 +5,20 @@ DEFINITION_URL = "https://api.dictionaryapi.dev/api/v2/entries/en/"
 
 
 def get_paragraph():
-    response = requests.get(PARAGRAPH_URL)
-    if response.status_code == 200:
+    try:
+        response = requests.get(PARAGRAPH_URL)
+        # If the response was successful, no Exception will be raised
+        response.raise_for_status()
         return response.text
-    else:
-        return None
+    except Exception:
+        raise
 
 
 def get_word_definition(word):
-    response = requests.get(DEFINITION_URL + word)
-    return response.json()
+    try:
+        response = requests.get(DEFINITION_URL + word)
+        # If the response was successful, no Exception will be raised
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        raise

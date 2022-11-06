@@ -10,8 +10,7 @@ from mock import patch
 
 from rest_framework import status
 from rest_framework.test import APIClient
-#from paragraph.views import get_paragraph
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from core.models import (
     Paragraph,
@@ -74,8 +73,8 @@ class PrivateParagraphApiTests(TestCase):
 
     def test_retrieve_paragraphs_or_operator(self):
         """Test retrieving a list of paragraphs."""
-        p1_id = create_paragraph("This is a test paragraph")
-        p2_id = create_paragraph("This is another sample paragraph")
+        create_paragraph("This is a test paragraph")
+        create_paragraph("This is another sample paragraph")
 
         params = {'words': f'{"test"},{"another"}', 'operator': f'{"or"}'}
         res = self.client.get(PARAGRAPHS_LIST_URL, params)
@@ -126,10 +125,11 @@ class PrivateParagraphApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(paragraph.text, "text")
 
-    @mock.mock.patch('paragraph.api_client.get_paragraph', return_value=None)
+    @mock.mock.patch('paragraph.api_client.get_paragraph', side_effect=Exception("error"))
     def test_create_paragraph_failure(self, mock_response):
         res = self.client.post(PARAGRAPHS_POST_URL)
         self.assertEqual(res.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(res.json(), {'error': 'error'})
 
     @patch("paragraph.api_client.get_word_definition")
     def test_retrieve_dictionary_success(self, mock_response):
@@ -147,6 +147,14 @@ class PrivateParagraphApiTests(TestCase):
         create_paragraph("this test paragraph")
         res = self.client.get(DICTIONARY_FETCH_URL)
         self.assertEqual(res.data, MOCK_RESPONSE)
+
+    @patch("paragraph.api_client.get_word_definition", side_effect=Exception("error"))
+    def test_retrieve_dictionary_failure(self, mock_response):
+        create_paragraph("this this test paragraph")
+        create_paragraph("this test paragraph")
+        res = self.client.get(DICTIONARY_FETCH_URL)
+        self.assertEqual(res.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+        self.assertEqual(res.json(), {'error': 'error'})
 
     def test_retrieve_dictionary_common_words(self):
         create_paragraph("this this test paragraph")

@@ -46,11 +46,12 @@ class ParagraphCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """Create new paragraph record for the authenticated user."""
-        text = api_client.get_paragraph()
-        if text is None:
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        try:
+            response_text = api_client.get_paragraph()
+        except Exception as err:
+            return Response(data={"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        serializer = self.get_serializer(data={"text": text})
+        serializer = self.get_serializer(data={"text": response_text})
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
@@ -77,15 +78,22 @@ class DictionaryRetrieveView(RetrieveAPIView):
     @staticmethod
     def _populate_response(common_words):
         response = {}
-        for word, count in common_words:
-            response[word] = api_client.get_word_definition(word)
+        try:
+            for word, count in common_words:
+                response[word] = api_client.get_word_definition(word)
+        except Exception:
+            raise
 
         return response
 
     def get(self, request, *args, **kwargs):
         """Get response for the authenticated user."""
         common_words = self._get_common_words(max_count=10)
-        response = self._populate_response(common_words)
+        try:
+            response = self._populate_response(common_words)
+        except Exception as err:
+            return Response(data={"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response(response, status=status.HTTP_200_OK)
 
 
