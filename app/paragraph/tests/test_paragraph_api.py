@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.test import TestCase
+from mock import patch
 
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -17,10 +18,17 @@ from core.models import (
 )
 
 from paragraph.serializers import ParagraphSerializer
+from paragraph.views import DictionaryRetrieveView
 
 PARAGRAPHS_LIST_URL = reverse('paragraph:paragraph-list')
 PARAGRAPHS_POST_URL = reverse('paragraph:create')
 DICTIONARY_FETCH_URL = reverse('paragraph:dict')
+
+MOCK_RESPONSE = {
+    "this": "The definition for word \'this\'",
+    "test": "The definition for word \'test\'",
+    "paragraph": "The definition for word \'paragraph\'",
+}
 
 
 def create_paragraph(text):
@@ -122,3 +130,29 @@ class PrivateParagraphApiTests(TestCase):
     def test_create_paragraph_failure(self, mock_response):
         res = self.client.post(PARAGRAPHS_POST_URL)
         self.assertEqual(res.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @patch("paragraph.api_client.get_word_definition")
+    def test_retrieve_dictionary_success(self, mock_response):
+        def side_effect(word):
+            if word == "this":
+                return "The definition for word \'this\'"
+            elif word == "test":
+                return "The definition for word \'test\'"
+            elif word == "paragraph":
+                return "The definition for word \'paragraph\'"
+
+        mock_response.side_effect = side_effect
+
+        create_paragraph("this this test paragraph")
+        create_paragraph("this test paragraph")
+        res = self.client.get(DICTIONARY_FETCH_URL)
+        self.assertEqual(res.data, MOCK_RESPONSE)
+
+    def test_retrieve_dictionary_common_words(self):
+        create_paragraph("this this test paragraph")
+        create_paragraph("this test paragraph")
+        words = DictionaryRetrieveView._get_common_words(10)
+        self.assertEqual(words[0], ('this', 3))
+        self.assertEqual(words[1], ('test', 2))
+        self.assertEqual(words[2], ('paragraph', 2))
+

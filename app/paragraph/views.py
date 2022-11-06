@@ -65,12 +65,12 @@ class DictionaryRetrieveView(RetrieveAPIView):
     serializer_class = serializers.ParagraphSerializer
 
     @staticmethod
-    def _get_common_words():
+    def _get_common_words(max_count):
         counter = Counter()
 
         for paragraph_text in Paragraph.objects.all():
             words = re.findall(r'\w+', paragraph_text.text)
-            counter += Counter(dict(Counter(words).most_common(10)))
+            counter += Counter(dict(Counter(words).most_common(max_count)))
 
         return counter.most_common(10)
 
@@ -84,7 +84,7 @@ class DictionaryRetrieveView(RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         """Get response for the authenticated user."""
-        common_words = self._get_common_words()
+        common_words = self._get_common_words(max_count=10)
         response = self._populate_response(common_words)
         return Response(response, status=status.HTTP_200_OK)
 
