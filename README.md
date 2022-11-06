@@ -56,7 +56,7 @@ requirements.txt
 The following REST API endpoints are exposed on the localhost after `docker-compose up` has run 
 successfully and started serving the paragraph search service.
 
-### /paragraph/get
+### **/paragraph/get**
 This fetches 1 paragraph from [http://metaphorpsum.com/](http://metaphorpsum.com/) with 50 sentences and stores it 
 as an instance of `Paragraph` model defined in [models.py](/app/core/models.py)
 
@@ -65,7 +65,7 @@ as an instance of `Paragraph` model defined in [models.py](/app/core/models.py)
 curl --location --request GET 'http://127.0.0.1:8000/paragraph/get'
 ```
 
-#### Sample Response
+##### Sample Response
 ```
 GET /paragraph/get HTTP/1.1" 201 3245
 
@@ -75,7 +75,7 @@ GET /paragraph/get HTTP/1.1" 201 3245
 } 
 ```
 
-### /paragraph/search/
+##### **/paragraph/search/**
 * Search through stored paragraphs 
 * Allow providing multiple words (`?words=`) and one of the two operators: **or** or **and** (`&operator=`). For example,
   * Words `one`, `two`, `three`, with the `or` operator should return any paragraphs that
@@ -83,12 +83,12 @@ GET /paragraph/get HTTP/1.1" 201 3245
   * Words `one`, `two`, `three`, with the `and` operator should return paragraphs that have
   all the three words.
 
-#### Sample Request
+##### Sample Request
 ```
 curl --location --request GET 'http://127.0.0.1:8000/api/paragraph/search?words=assumed&operator=and'
 ```
 
-#### Sample Response
+##### Sample Response
 ```
 GET /paragraph/search/?words=assumed&operator=and HTTP/1.1" 200 74999
 
@@ -105,16 +105,16 @@ GET /paragraph/search/?words=assumed&operator=and HTTP/1.1" 200 74999
 ]
 ```
 
-### /paragraph/dictionary/
+### **/paragraph/dictionary/**
 * Returns the definition of the top 10 words (frequency) found in the all the paragraphs currently store in the system.
 * Word definition should retrieved from [https://dictionaryapi.dev/](https://dictionaryapi.dev/).
 
-#### Sample Request
+##### Sample Request
 ```
 curl --location --request GET 'http://127.0.0.1:8000/paragraph/dictionary'
 ```
 
-#### Sample Response
+##### Sample Response
 ```
 GET /paragraph/dictionary HTTP/1.1" 200 30751
 
