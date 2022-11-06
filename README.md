@@ -93,7 +93,7 @@ GET /paragraph/get HTTP/1.1" 201 3245
 } 
 ```
 
-### **/paragraph/search/**
+### **/paragraph/search?**
 * This searches through the stored paragraphs, and allows filtering based on the query parameters.
 * For query parameters, we can provide comma separated words (`?words=word1,word2..`) and one of the 
   two operators: **or** or **and** (`&operator=`). For example,
@@ -104,6 +104,7 @@ GET /paragraph/get HTTP/1.1" 201 3245
 * If no query parameters are provided, then the API returns all the paragraphs stored in the database.
 * If query parameters are present, then providing both in the URL, i.e `words` and `operator`, is mandatory. If only 
   either one is provided, it is considered as a Bad Request.
+* If incorrectly named search query parameters are provided, it is considered as a Bad Request as well.  
 
 ##### Sample Request
 ```
@@ -127,7 +128,7 @@ GET /paragraph/search/?words=assumed&operator=and HTTP/1.1" 200 74999
 ]
 ```
 
-### **/paragraph/dictionary/**
+### **/paragraph/dictionary**
 * This returns the definition of the top 10 words (frequency wise) found in all the paragraphs currently stored in 
   the database.
 * Word definition is retrieved from [https://dictionaryapi.dev/](https://dictionaryapi.dev/).

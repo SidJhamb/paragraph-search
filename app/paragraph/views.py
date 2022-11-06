@@ -115,10 +115,12 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
             for word in words:
                 query += word + " | "
             query = query.removesuffix(" | ")
-        else:
+        elif operator == "and":
             for word in words:
                 query += word + " & "
             query = query.removesuffix(" & ")
+        else:
+            raise ValidationError(detail='Invalid operator used for filtering.')
 
         return SearchQuery(query, search_type="raw")
 
@@ -144,4 +146,4 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         if not word_filter_present and not operator_filter_present:
             return Paragraph.objects.all()
 
-        raise ValidationError(detail='Incomplete search query parameters.')
+        raise ValidationError(detail='Invalid search query parameters.')

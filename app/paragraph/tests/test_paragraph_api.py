@@ -110,11 +110,19 @@ class ParagraphSearchApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_retrieve_paragraphs_bad_request(self):
+    def test_retrieve_paragraphs_bad_request_incomplete_query(self):
         create_paragraph("This is a test paragraph")
         create_paragraph("This is another sample paragraph")
 
         params = {'words': f'{"test"},{"another"}'}
+        res = self.client.get(PARAGRAPHS_LIST_URL, params)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_retrieve_paragraphs_bad_request_invalid_operator(self):
+        create_paragraph("This is a test paragraph")
+        create_paragraph("This is another sample paragraph")
+
+        params = {'words': f'{"test"},{"another"}', 'operator': f'{"logical"}'}
         res = self.client.get(PARAGRAPHS_LIST_URL, params)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
