@@ -2,6 +2,7 @@
 Views for the paragraph APIs
 """
 import re
+import logging
 from collections import Counter
 
 from drf_spectacular.utils import (
@@ -34,24 +35,26 @@ from paragraph import (
     api_client
 )
 
+logger = logging.getLogger(__name__)
 
-class ParagraphCreateView(CreateAPIView):
-    """View for creating paragraphs."""
+
+class ParagraphCreateView(RetrieveAPIView):
+    """View for fetching paragraphs from an external API and storing in the database."""
     queryset = Paragraph.objects.all()
     serializer_class = serializers.ParagraphSerializer
 
-    def create(self, request, *args, **kwargs):
-        """Create new paragraph record for the authenticated user."""
+    def get(self, request, *args, **kwargs):
+        """Create new paragraph record."""
         try:
+            logger.info('This is a debug message')
             response_text = api_client.get_paragraph()
         except Exception as err:
             return Response(data={"error": str(err)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         serializer = self.get_serializer(data={"text": response_text})
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class DictionaryRetrieveView(RetrieveAPIView):
@@ -77,7 +80,7 @@ class DictionaryRetrieveView(RetrieveAPIView):
         return response
 
     def get(self, request, *args, **kwargs):
-        """Get response for the authenticated user."""
+        """Get response."""
         common_words = self._get_common_words(max_count=10)
         try:
             response = self._populate_response(common_words)

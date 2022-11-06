@@ -41,14 +41,14 @@ class ParagraphCreateApiTest(TestCase):
 
     @mock.mock.patch('paragraph.api_client.get_paragraph', return_value="text")
     def test_create_paragraph_success(self, mock_response):
-        res = self.client.post(PARAGRAPHS_POST_URL)
+        res = self.client.get(PARAGRAPHS_POST_URL)
         paragraph = Paragraph.objects.first()
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(paragraph.text, "text")
 
     @mock.mock.patch('paragraph.api_client.get_paragraph', side_effect=Exception("error"))
     def test_create_paragraph_failure(self, mock_response):
-        res = self.client.post(PARAGRAPHS_POST_URL)
+        res = self.client.get(PARAGRAPHS_POST_URL)
         self.assertEqual(res.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
         self.assertEqual(res.json(), {'error': 'error'})
 
