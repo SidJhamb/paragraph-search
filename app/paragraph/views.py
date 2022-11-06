@@ -144,4 +144,4 @@ class ParagraphListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
         if not word_filter_present and not operator_filter_present:
             return Paragraph.objects.all()
 
-        raise ValidationError(detail='Invalid search query parameters.')
+        raise ValidationError(detail='Incomplete search query parameters.')
