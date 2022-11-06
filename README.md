@@ -34,7 +34,7 @@ docker-compose run --rm app sh -c "python manage.py test"
 GitHub actions are enabled for merges to the source code repository, and they automate the execution of following
 tasks.
 * Running Unit Tests.
-* Running Linting checks by leveraging the `flake8` module.
+* Running Linting checks by leveraging the [flake8](https://pypi.org/project/flake8/) module.
 
 ## Source Code Structure
 ```
